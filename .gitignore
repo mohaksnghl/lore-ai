@@ -1,0 +1,29 @@
+# Environment / secrets
+.env
+*.env.local
+service-account.json
+*-credentials.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+dist/
+*.egg-info/
+
+# Node / React
+node_modules/
+client/dist/
+client/.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

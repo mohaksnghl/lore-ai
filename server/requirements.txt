@@ -1,0 +1,14 @@
+# Core ADK + Gemini
+google-adk>=0.6.0
+google-genai>=1.0.0
+
+# Web server
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+websockets>=12.0
+
+# Firebase / Firestore
+firebase-admin>=6.5.0
+
+# Utilities
+python-dotenv>=1.0.0
