@@ -25,18 +25,25 @@ import firebase_admin
 from firebase_admin import credentials, firestore_async
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.agents.live_request_queue import LiveRequestQueue
 from google.adk.agents.run_config import RunConfig, StreamingMode
 from google.genai import types as genai_types
+from google.genai.types import SessionResumptionConfig
 
 from agent import root_agent
 from agent.tools import _image_store
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Suppress verbose tracebacks from the Gemini Live API for known transient
+# errors (1007/1008/1011) — our own retry logic handles them.
+logging.getLogger("google_adk.google.adk.flows.llm_flows.base_llm_flow").setLevel(logging.CRITICAL)
+logging.getLogger("google.genai.live").setLevel(logging.WARNING)
 
 # ---------------------------------------------------------------------------
 # App lifecycle
@@ -103,9 +110,10 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
         user_id=client_session_id,
     )
 
-    # Mutable container so retry logic can swap in a fresh queue
-    # and client_to_agent always references the current one
+    # Mutable containers so retry logic can swap in fresh instances
+    # and client_to_agent always references the current ones
     queue_holder: dict[str, LiveRequestQueue] = {"q": LiveRequestQueue()}
+    session_holder: dict[str, str] = {"id": session.id}
 
     run_config = RunConfig(
         streaming_mode=StreamingMode.BIDI,
@@ -115,7 +123,7 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
         speech_config=genai_types.SpeechConfig(
             voice_config=genai_types.VoiceConfig(
                 prebuilt_voice_config=genai_types.PrebuiltVoiceConfig(
-                    voice_name="Charon",  # Deep, warm documentary voice
+                    voice_name="Charon",
                 )
             )
         ),
@@ -129,6 +137,7 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
             activity_handling=genai_types.ActivityHandling.START_OF_ACTIVITY_INTERRUPTS,
             turn_coverage=genai_types.TurnCoverage.TURN_INCLUDES_ALL_INPUT,
         ),
+        session_resumption=SessionResumptionConfig(handle=None),
     )
 
     runner = Runner(
@@ -143,23 +152,19 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
     generated_images: list[dict] = []
 
     async def agent_to_client():
-        """Forward ADK agent events → WebSocket client.
-
-        Includes retry logic for the known Gemini Live API 1008/1011/1007 bug
-        that occurs during function calling with native audio models.
-        """
+        """Forward ADK agent events → WebSocket client."""
         MAX_RETRIES = 3
+        RETRYABLE_CODES = ("1000", "1007", "1008", "1011")
         retry_count = 0
 
         while retry_count <= MAX_RETRIES:
             try:
                 async for event in runner.run_live(
                     user_id=client_session_id,
-                    session_id=session.id,
+                    session_id=session_holder["id"],
                     live_request_queue=queue_holder["q"],
                     run_config=run_config,
                 ):
-                    # Audio chunks from model
                     if event.content and event.content.parts:
                         for part in event.content.parts:
                             if part.inline_data and part.inline_data.data:
@@ -168,12 +173,12 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
                                 )
 
                             if part.function_call:
-                                logger.info("🔧 Tool call: %s(%s)",
+                                logger.info("Tool call: %s(%s)",
                                     part.function_call.name,
                                     str(part.function_call.args)[:120])
 
                             if part.function_response:
-                                logger.info("✅ Tool result: %s → %s",
+                                logger.info("Tool result: %s -> %s",
                                     part.function_response.name,
                                     str(part.function_response.response)[:120])
 
@@ -186,12 +191,11 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
                                 if image_id and image_id in _image_store:
                                     image_data = _image_store.pop(image_id)
                                     generated_images.append(image_data)
-                                    logger.info("🖼️ Sending image to client, caption=%s", image_data.get("caption", "")[:60])
+                                    logger.info("Sending image to client, caption=%s", image_data.get("caption", "")[:60])
                                     await websocket.send_text(
                                         json.dumps({"type": "image", **image_data})
                                     )
 
-                    # Output transcription — stream partials for word-by-word display
                     if event.output_transcription and event.output_transcription.text:
                         text = event.output_transcription.text
                         is_partial = bool(event.partial)
@@ -206,7 +210,6 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
                             })
                         )
 
-                    # Input transcription — also stream partials
                     if event.input_transcription and event.input_transcription.text:
                         text = event.input_transcription.text
                         is_partial = bool(event.partial)
@@ -223,34 +226,42 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
                         chunks = getattr(event.grounding_metadata, 'grounding_chunks', None) or []
                         if chunks:
                             sources = [getattr(c, 'web', None) for c in chunks if getattr(c, 'web', None)]
-                            logger.info("🔍 Grounded via %d sources: %s",
+                            logger.info("Grounded via %d sources: %s",
                                 len(sources),
                                 [getattr(s, 'uri', '')[:60] for s in sources[:3]])
 
-                    # Interruption — user barged in while model was speaking
                     if event.interrupted:
-                        logger.info("⚡ User interrupted — flushing client audio")
+                        logger.info("User interrupted — flushing client audio")
                         await websocket.send_text(json.dumps({"type": "interrupted"}))
 
                     if event.turn_complete:
                         await websocket.send_text(json.dumps({"type": "turn_complete"}))
 
-                break  # Clean exit from run_live — no retry needed
+                break
 
             except Exception as exc:
                 error_msg = str(exc)
-                is_retryable = any(code in error_msg for code in ("1007", "1008", "1011"))
+                is_retryable = any(code in error_msg for code in RETRYABLE_CODES)
                 retry_count += 1
 
                 if is_retryable and retry_count <= MAX_RETRIES:
+                    backoff = min(2 ** retry_count, 8)
                     logger.warning(
-                        "Live API session dropped (%s), reconnecting (attempt %d/%d)...",
-                        error_msg[:80], retry_count, MAX_RETRIES,
+                        "Live API session dropped (%s), reconnecting in %.1fs (attempt %d/%d)...",
+                        error_msg[:80], backoff, retry_count, MAX_RETRIES,
                     )
-                    # Fresh queue so stale audio/video data doesn't corrupt the new session
                     queue_holder["q"].close()
                     queue_holder["q"] = LiveRequestQueue()
-                    await asyncio.sleep(1.5)
+                    try:
+                        new_session = await session_service.create_session(
+                            app_name=APP_NAME,
+                            user_id=client_session_id,
+                        )
+                        session_holder["id"] = new_session.id
+                        logger.info("Created fresh session: %s", new_session.id)
+                    except Exception as session_exc:
+                        logger.error("Failed to create new session: %s", session_exc)
+                    await asyncio.sleep(backoff)
                     continue
                 else:
                     logger.error("agent_to_client error: %s", exc, exc_info=True)
@@ -385,6 +396,16 @@ async def _save_session(
         logger.info("Session %s saved to Firestore", session_id)
     except Exception as exc:
         logger.error("Failed to save session to Firestore: %s", exc)
+
+
+# ---------------------------------------------------------------------------
+# Serve React frontend (static files built into ./static by Dockerfile)
+# ---------------------------------------------------------------------------
+
+_static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(_static_dir):
+    app.mount("/", StaticFiles(directory=_static_dir, html=True), name="static")
+    logger.info("Serving React frontend from %s", _static_dir)
 
 
 # ---------------------------------------------------------------------------

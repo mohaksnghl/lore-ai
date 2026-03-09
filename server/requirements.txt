@@ -12,3 +12,4 @@ firebase-admin>=6.5.0
 
 # Utilities
 python-dotenv>=1.0.0
+aiofiles>=23.0.0

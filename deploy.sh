@@ -22,7 +22,8 @@ echo ""
 
 # ── Build & push ─────────────────────────────────────────────────────────────
 echo "▶ Building Docker image..."
-gcloud builds submit ./server \
+# Root context — multi-stage Dockerfile builds React client + Python server
+gcloud builds submit . \
   --tag "${IMAGE}:latest" \
   --project "${PROJECT_ID}"
 

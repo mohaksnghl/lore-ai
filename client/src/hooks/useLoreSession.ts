@@ -17,8 +17,11 @@ import type {
   ServerMessage,
 } from "../types";
 
+// In production the client is served from the same Cloud Run host.
+// Fall back to localhost only in local dev (no VITE_SERVER_URL set).
 const SERVER_URL =
-  (import.meta.env.VITE_SERVER_URL as string | undefined) || "ws://localhost:8080";
+  (import.meta.env.VITE_SERVER_URL as string | undefined) ||
+  `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`;
 
 const FRAME_INTERVAL_MS = 1000; // 1 FPS
 const GEMINI_OUTPUT_SAMPLE_RATE = 24000; // Gemini outputs 24kHz PCM

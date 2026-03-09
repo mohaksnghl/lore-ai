@@ -1,0 +1,19 @@
+# Node
+client/node_modules/
+client/.env*
+
+# Python
+server/.venv/
+server/__pycache__/
+server/**/__pycache__/
+server/*.pyc
+server/.env*
+server/service-account.json
+
+# Git / editor
+.git/
+.gitignore
+**/.DS_Store
+
+# Local env
+.env

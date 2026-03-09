@@ -19,7 +19,7 @@ substitutions:
   _ARTIFACT_REPO: lore-repo
 
 steps:
-  # 1. Build the server Docker image
+  # 1. Build the image (root context — multi-stage: React client + Python server)
   - name: "gcr.io/cloud-builders/docker"
     args:
       - build
@@ -27,7 +27,7 @@ steps:
       - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/${_SERVICE_NAME}:$COMMIT_SHA"
       - -t
       - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO}/${_SERVICE_NAME}:latest"
-      - ./server
+      - .
     id: build
 
   # 2. Push to Artifact Registry
