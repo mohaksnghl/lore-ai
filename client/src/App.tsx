@@ -5,7 +5,7 @@ import { MicButton } from "./components/MicButton";
 import { useLoreSession } from "./hooks/useLoreSession";
 
 export default function App() {
-  const { status, transcript, images, isSpeaking, summary, connect, disconnect } =
+  const { status, transcript, images, isSpeaking, isMicMuted, summary, connect, disconnect, toggleMicMuted } =
     useLoreSession();
 
   const [started, setStarted] = useState(false);
@@ -74,21 +74,21 @@ export default function App() {
         )}
       </div>
 
-      {/* Narration panel — bottom 32% */}
+      {/* Narration panel */}
       <div style={styles.narrationPane}>
         <NarrationPanel transcript={transcript} images={images} isSpeaking={isSpeaking} />
       </div>
 
-      {/* Floating mic button */}
-      {started && (
-        <div style={styles.micContainer}>
+      {/* Mic button row — always in flow, below narration */}
+      <div style={styles.micBar}>
+        {started && status === "connected" && (
           <MicButton
-            isActive={status === "connected"}
+            isMuted={isMicMuted}
             isSpeaking={isSpeaking}
-            onPress={() => {}} // VAD handles turn-taking automatically
+            onToggle={toggleMicMuted}
           />
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Connection status indicator */}
       {status === "error" && (
@@ -117,9 +117,10 @@ const styles: Record<string, React.CSSProperties> = {
     background: "#111",
   },
   narrationPane: {
-    flex: "0 0 70%",
+    flex: 1,
     overflow: "hidden",
     borderTop: "1px solid #222",
+    minHeight: 0,
   },
   wordmark: {
     position: "absolute",
@@ -175,12 +176,14 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 10,
     backdropFilter: "blur(6px)",
   },
-  micContainer: {
-    position: "absolute",
-    bottom: "70%",
-    right: 20,
-    transform: "translateY(50%)",
-    zIndex: 30,
+  micBar: {
+    flexShrink: 0,
+    height: 100,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#0a0a0a",
+    borderTop: "1px solid #1a1a1a",
   },
   errorBanner: {
     position: "absolute",

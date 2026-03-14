@@ -56,6 +56,10 @@ export function useLoreSession() {
 
   // Client-side interruption detection — tracks whether narrator audio is playing
   const isSpeakingRef = useRef(false);
+
+  // Tap-to-mute: mic is ON by default; user taps button to toggle
+  const [isMicMuted, setIsMicMuted] = useState(false);
+  const isMicMutedRef = useRef(false);
   const micVadIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
 
@@ -124,6 +128,28 @@ export function useLoreSession() {
       ];
     });
   }
+
+  // -----------------------------------------------------------------------
+  // Tap-to-mute toggle
+  // -----------------------------------------------------------------------
+
+  const toggleMicMuted = useCallback(() => {
+    const nowMuted = !isMicMutedRef.current;
+    isMicMutedRef.current = nowMuted;
+    setIsMicMuted(nowMuted);
+
+    if (nowMuted) {
+      // Send 600ms of silence so Gemini's VAD detects end-of-speech
+      const ws = wsRef.current;
+      if (ws?.readyState === WebSocket.OPEN) {
+        const silence = new Int16Array(Math.ceil(MIC_SAMPLE_RATE * 0.6));
+        const tagged = new Uint8Array(silence.byteLength + 1);
+        tagged[0] = 0x01;
+        tagged.set(new Uint8Array(silence.buffer), 1);
+        ws.send(tagged);
+      }
+    }
+  }, []);
 
   // -----------------------------------------------------------------------
   // Connect
@@ -200,6 +226,7 @@ export function useLoreSession() {
     captureWorkletRef.current = captureNode;
 
     captureNode.port.onmessage = (e) => {
+      if (isMicMutedRef.current) return;
       if (e.data.type === "pcm" && ws.readyState === WebSocket.OPEN) {
         const tagged = new Uint8Array(e.data.chunk.byteLength + 1);
         tagged[0] = 0x01; // audio tag
@@ -443,8 +470,10 @@ export function useLoreSession() {
     transcript,
     images,
     isSpeaking,
+    isMicMuted,
     summary,
     connect,
     disconnect,
+    toggleMicMuted,
   };
 }

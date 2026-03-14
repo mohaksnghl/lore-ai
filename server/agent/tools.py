@@ -11,8 +11,7 @@ from google.genai import types
 
 logger = logging.getLogger(__name__)
 
-# Nano Banana — Gemini native image generation
-IMAGE_GEN_MODEL = "gemini-2.0-flash-exp-image-generation"
+IMAGE_GEN_MODEL = "gemini-2.5-flash-image"
 
 # Out-of-band image store: image_id -> {image_url, caption}
 _image_store: dict[str, dict] = {}

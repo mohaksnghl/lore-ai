@@ -129,7 +129,7 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
         ),
         realtime_input_config=genai_types.RealtimeInputConfig(
             automatic_activity_detection=genai_types.AutomaticActivityDetection(
-                start_of_speech_sensitivity=genai_types.StartSensitivity.START_SENSITIVITY_HIGH,
+                start_of_speech_sensitivity=genai_types.StartSensitivity.START_SENSITIVITY_LOW,
                 end_of_speech_sensitivity=genai_types.EndSensitivity.END_SENSITIVITY_HIGH,
                 prefix_padding_ms=100,
                 silence_duration_ms=500,
