@@ -19,6 +19,10 @@ node_modules/
 client/dist/
 client/.vite/
 
+# Architecture diagram source/exports
+architecture.html
+lore-architecture.png
+
 # OS
 .DS_Store
 Thumbs.db
