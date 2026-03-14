@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<svg width="1100" height="650" viewBox="0 0 1100 650" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="sh">
+      <feDropShadow dx="0" dy="2" stdDeviation="5" flood-color="rgba(0,0,0,0.08)"/>
+    </filter>
+    <marker id="aG" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#5f6368"/>
+    </marker>
+    <marker id="aB" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#4285f4"/>
+    </marker>
+    <marker id="aGr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#34a853"/>
+    </marker>
+    <marker id="aY" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#e8710a"/>
+    </marker>
+  </defs>
+
+  <rect width="1100" height="680" fill="#ffffff"/>
+
+  <!-- ── Title ── -->
+  <text x="550" y="40" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="24" font-weight="500" fill="#202124">LORE</text>
+  <text x="550" y="58" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#9aa0a6">Real-time AI documentary narrator — point your camera, hear the story</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- USER -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <g filter="url(#sh)">
+    <rect x="50" y="170" width="170" height="230" rx="14" fill="#fff" stroke="#dadce0" stroke-width="1.2"/>
+  </g>
+  <!-- Phone outline -->
+  <rect x="113" y="190" width="44" height="68" rx="10" fill="none" stroke="#4285f4" stroke-width="2"/>
+  <rect x="129" y="248" width="12" height="3" rx="1.5" fill="#4285f4"/>
+  <!-- Notch -->
+  <rect x="127" y="194" width="16" height="4" rx="2" fill="#4285f4" opacity="0.3"/>
+  <text x="135" y="286" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="14" font-weight="500" fill="#202124">User's Phone</text>
+
+  <!-- Multimodal callouts -->
+  <g>
+    <rect x="70" y="304" width="130" height="22" rx="5" fill="#f1f3f4"/>
+    <circle cx="84" cy="315" r="4" fill="#ea4335"/>
+    <text x="140" y="319" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#3c4043">Camera</text>
+  </g>
+  <g>
+    <rect x="70" y="332" width="130" height="22" rx="5" fill="#f1f3f4"/>
+    <circle cx="84" cy="343" r="4" fill="#34a853"/>
+    <text x="140" y="347" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#3c4043">Mic</text>
+  </g>
+  <g>
+    <rect x="70" y="360" width="130" height="22" rx="5" fill="#f1f3f4"/>
+    <circle cx="84" cy="371" r="4" fill="#4285f4"/>
+  <text x="140" y="375" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#3c4043">Speaker</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- ARROW: User → Server -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <line x1="222" y1="278" x2="335" y2="278" stroke="#5f6368" stroke-width="1.5" marker-end="url(#aG)"/>
+  <text x="278" y="270" text-anchor="middle" font-family="Roboto, sans-serif" font-size="9" fill="#5f6368">WebSocket</text>
+  <text x="278" y="296" text-anchor="middle" font-family="Roboto, sans-serif" font-size="8" fill="#80868b">binary + JSON</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- CLOUD RUN CONTAINER -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <g filter="url(#sh)">
+    <rect x="343" y="148" width="260" height="280" rx="14" fill="#fff" stroke="#dadce0" stroke-width="1.2"/>
+  </g>
+
+  <!-- Cloud Run header -->
+  <rect x="363" y="162" width="220" height="30" rx="8" fill="#e8f0fe"/>
+  <circle cx="380" cy="177" r="4" fill="#ea4335"/>
+  <circle cx="391" cy="177" r="4" fill="#fbbc04"/>
+  <circle cx="402" cy="177" r="4" fill="#34a853"/>
+  <circle cx="413" cy="177" r="4" fill="#4285f4"/>
+  <text x="490" y="182" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="12" font-weight="500" fill="#1967d2">Google Cloud Run</text>
+
+  <text x="473" y="222" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="15" font-weight="500" fill="#202124">FastAPI Server</text>
+  <text x="473" y="240" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#80868b">Python 3.11 · uvicorn</text>
+
+  <!-- ADK agent box (nested) -->
+  <rect x="368" y="256" width="210" height="148" rx="10" fill="#f8f9fa" stroke="#e8eaed" stroke-width="1"/>
+  <text x="473" y="278" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="11" font-weight="500" fill="#1967d2">Google ADK Agent</text>
+
+  <rect x="382" y="290" width="182" height="24" rx="5" fill="#fff" stroke="#e8eaed" stroke-width="1"/>
+  <text x="473" y="307" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#3c4043">ADK Runner (run_live)</text>
+
+  <rect x="382" y="320" width="182" height="24" rx="5" fill="#fff" stroke="#e8eaed" stroke-width="1"/>
+  <text x="473" y="337" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#3c4043">LiveRequestQueue (BIDI)</text>
+
+  <rect x="382" y="350" width="182" height="24" rx="5" fill="#fff" stroke="#e8eaed" stroke-width="1"/>
+  <text x="473" y="367" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#3c4043">Session resumption + retry</text>
+
+  <rect x="382" y="380" width="182" height="24" rx="5" fill="#fff" stroke="#e8eaed" stroke-width="1"/>
+  <text x="473" y="397" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#3c4043">Tool dispatch (2 tools)</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- ARROW: Server → Gemini -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <line x1="605" y1="278" x2="720" y2="278" stroke="#4285f4" stroke-width="2" marker-end="url(#aB)"/>
+  <text x="663" y="268" text-anchor="middle" font-family="Roboto, sans-serif" font-size="9" fill="#4285f4">BIDI streaming</text>
+  <text x="663" y="296" text-anchor="middle" font-family="Roboto, sans-serif" font-size="8" fill="#80868b">audio + video + events</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- GEMINI LIVE API -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <g filter="url(#sh)">
+    <rect x="728" y="148" width="230" height="280" rx="14" fill="#4285f4"/>
+  </g>
+
+  <!-- Sparkle icon -->
+  <text x="843" y="192" text-anchor="middle" font-size="28" fill="rgba(255,255,255,0.9)">✦</text>
+  <text x="843" y="220" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="16" font-weight="500" fill="#fff">Gemini Live API</text>
+  <text x="843" y="240" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="rgba(255,255,255,0.7)">gemini-2.5-flash-native-audio</text>
+
+  <!-- Capabilities -->
+  <rect x="752" y="258" width="182" height="26" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <text x="843" y="276" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff">Vision — see through camera</text>
+
+  <rect x="752" y="292" width="182" height="26" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <text x="843" y="310" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff">Audio In / Out — voice-first</text>
+
+  <rect x="752" y="326" width="182" height="26" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <text x="843" y="344" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff">Transcription + VAD</text>
+
+  <rect x="752" y="360" width="182" height="26" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <text x="843" y="378" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff">Interruption handling</text>
+
+  <rect x="752" y="394" width="182" height="26" rx="6" fill="rgba(255,255,255,0.15)"/>
+  <text x="843" y="412" text-anchor="middle" font-family="Roboto, sans-serif" font-size="11" fill="#fff">Native audio reasoning</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOOL 1: Google Search -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <line x1="420" y1="430" x2="420" y2="490" stroke="#34a853" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aGr)"/>
+  <text x="438" y="466" font-family="Roboto, sans-serif" font-size="8" fill="#34a853">tool call</text>
+
+  <g filter="url(#sh)">
+    <rect x="320" y="498" width="200" height="96" rx="12" fill="#fff" stroke="#34a853" stroke-width="1.5"/>
+  </g>
+  <!-- Green badge -->
+  <rect x="340" y="512" width="72" height="20" rx="10" fill="#e6f4ea"/>
+  <text x="376" y="526" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="9" font-weight="500" fill="#137333">ADK built-in</text>
+  <text x="420" y="554" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="14" font-weight="500" fill="#202124">Google Search</text>
+  <text x="420" y="574" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#34a853">Grounds facts — no hallucination</text>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOOL 2: Image Gen -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <line x1="530" y1="430" x2="640" y2="490" stroke="#e8710a" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#aY)"/>
+  <text x="600" y="466" font-family="Roboto, sans-serif" font-size="8" fill="#e8710a">tool call</text>
+
+  <g filter="url(#sh)">
+    <rect x="570" y="498" width="210" height="96" rx="12" fill="#fff" stroke="#e8710a" stroke-width="1.5"/>
+  </g>
+  <!-- Orange badge -->
+  <rect x="590" y="512" width="90" height="20" rx="10" fill="#fef7e0"/>
+  <text x="635" y="526" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="9" font-weight="500" fill="#b06000">Custom tool</text>
+  <text x="675" y="554" text-anchor="middle" font-family="Google Sans, Segoe UI, sans-serif" font-size="14" font-weight="500" fill="#202124">Gemini Image Gen</text>
+  <text x="675" y="574" text-anchor="middle" font-family="Roboto, sans-serif" font-size="10" fill="#e8710a">Visual footnotes woven into narration</text>
+
+  <!-- Footer -->
+  <text x="550" y="636" text-anchor="middle" font-family="Roboto, sans-serif" font-size="9" letter-spacing="1.5" fill="#bdc1c6">GEMINI LIVE AGENT CHALLENGE · MARCH 2026</text>
+
+</svg>
+</body>
+</html>

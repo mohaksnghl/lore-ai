@@ -60,7 +60,7 @@ Point your phone camera at anything — a building, a tree, a painting, a street
 ### 1. Clone & configure
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/lore-ai.git
+git clone https://github.com/mohaksnghl/lore-ai.git
 cd lore-ai
 cp .env.example .env
 # Edit .env — fill in GOOGLE_API_KEY at minimum
