@@ -3,6 +3,8 @@
 > A real-time AI documentary agent powered by Gemini Live API + Google ADK.
 > Built for the **Gemini Live Agent Challenge** · Track: The Live Agent · Deadline: March 16, 2026
 
+**Live Demo:** https://lore-server-bfnrkmdtyq-uc.a.run.app
+
 ---
 
 ## What Is Lore?
@@ -10,7 +12,15 @@
 Point your phone camera at anything — a building, a tree, a painting, a street sign — and Lore instantly becomes your personal documentary narrator. It sees what you see, grounds facts via Google Search, and delivers captivating spoken narration with contextual images woven in. All in real-time, hands-free, interruptable.
 
 **Core loop:**
-`Camera → Gemini Live API (vision + voice) → Google Search grounding → Audio narration → Nano Banana image generation`
+`Camera → Gemini Live API (vision + voice) → Google Search grounding → Audio narration → Gemini image generation`
+
+**Key features:**
+- Real-time spoken narration via Gemini Live API (bidirectional audio + video)
+- Google Search grounding — no hallucinated dates, names, or statistics
+- Contextual image generation woven into the narration
+- Voice interruption — ask questions mid-narration, Lore answers and resumes
+- Tap-to-mute mic button (Google Meet-style) for noisy environments
+- Session summary screen at the end with images and topics explored
 
 ---
 
@@ -19,22 +29,20 @@ Point your phone camera at anything — a building, a tree, a painting, a street
 ```
 [Mobile Browser]  ←── WebSocket ──→  [FastAPI on Cloud Run]  ←── bidi ──→  [Gemini Live API]
   Camera + Mic                          ADK Agent                            Vision + Audio
-                                            │
-                                       [Firestore]        [Nano Banana / Gemini Flash Image]
-                                      Session Store            Contextual Images
+                                                               [Gemini Flash Image]
+                                                               Contextual Images
 ```
 
 **Stack:**
 
 | Layer | Technology |
 |-------|-----------|
-| AI Model | Gemini Live API (`gemini-live-2.5-flash-preview-native-audio`) |
+| AI Model | Gemini Live API (`gemini-2.5-flash-native-audio-latest`) |
 | Agent Framework | Google ADK (Python) ≥ 0.6 |
-| Image Generation | Nano Banana (`gemini-2.0-flash-preview-image-generation`) |
+| Image Generation | Gemini Image (`gemini-2.5-flash-image`) |
 | Search Grounding | ADK built-in `google_search` tool |
 | Backend | FastAPI + uvicorn |
 | Frontend | React 18 + Vite (TypeScript) |
-| Database | Firestore |
 | Hosting | Cloud Run |
 | CI/CD | Cloud Build (`cloudbuild.yaml`) |
 
@@ -47,12 +55,12 @@ Point your phone camera at anything — a building, a tree, a painting, a street
 - Python 3.11+
 - Node.js 20+
 - A Google API key with Gemini API enabled ([get one](https://aistudio.google.com/app/apikey))
-- *(Optional)* A Google Cloud project + Firestore for session persistence
+- *(Optional)* A Google Cloud project for Cloud Run deployment
 
 ### 1. Clone & configure
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/YOUR_USERNAME/lore-ai.git
 cd lore-ai
 cp .env.example .env
 # Edit .env — fill in GOOGLE_API_KEY at minimum
@@ -132,13 +140,13 @@ lore-ai/
 │   ├── agent/
 │   │   ├── __init__.py
 │   │   ├── lore_agent.py     # ADK Agent + system prompt
-│   │   └── tools.py          # generate_image tool (Nano Banana)
+│   │   └── tools.py          # generate_image tool (Gemini Flash Image)
 │   ├── main.py               # FastAPI WebSocket server
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── client/
 │   ├── src/
-│   │   ├── App.tsx           # Root layout (camera 68% / narration 32%)
+│   │   ├── App.tsx           # Root layout (camera 30% / narration flex / mic bar)
 │   │   ├── components/
 │   │   │   ├── CameraFeed.tsx
 │   │   │   ├── NarrationPanel.tsx

@@ -6,23 +6,16 @@ audio + video streaming.
 
 Architecture:
   [Browser] <--WS--> [This server] <--bidi--> [Gemini Live API]
-                          |
-                     [Firestore]  [Nano Banana / Image Gen]
 """
 
 import asyncio
 import json
 import logging
 import os
-import uuid
-from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 load_dotenv()  # Load .env before ADK/genai clients initialize
 
-
-import firebase_admin
-from firebase_admin import credentials, firestore_async
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -45,30 +38,7 @@ logger = logging.getLogger(__name__)
 logging.getLogger("google_adk.google.adk.flows.llm_flows.base_llm_flow").setLevel(logging.CRITICAL)
 logging.getLogger("google.genai.live").setLevel(logging.WARNING)
 
-# ---------------------------------------------------------------------------
-# App lifecycle
-# ---------------------------------------------------------------------------
-
-db = None  # Firestore async client
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global db
-    # Initialize Firebase only if credentials are provided
-    cred_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-    if cred_path and os.path.exists(cred_path) and project_id and not firebase_admin._apps:
-        cred = credentials.Certificate(cred_path)
-        firebase_admin.initialize_app(cred, {"projectId": project_id})
-        db = firestore_async.client()
-        logger.info("Firestore initialized for project %s", project_id)
-    else:
-        logger.warning("Firestore not configured — session data will not be persisted")
-    yield
-
-
-app = FastAPI(title="Lore API", lifespan=lifespan)
+app = FastAPI(title="Lore API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -78,7 +48,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Shared session service (in-memory for hackathon; swap for DB-backed in prod)
+# Shared session service (in-memory)
 session_service = InMemorySessionService()
 
 APP_NAME = "lore"
@@ -146,7 +116,6 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
         session_service=session_service,
     )
 
-    # Track session data for Firestore
     session_topics: list[dict] = []
     session_transcript: list[str] = []
     generated_images: list[dict] = []
@@ -320,13 +289,6 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
 
                     if msg_type == "end_session":
                         logger.info("Client ended session: %s", client_session_id)
-                        await _save_session(
-                            client_session_id,
-                            session_topics,
-                            session_transcript,
-                            generated_images,
-                        )
-                        # Send session summary back
                         await websocket.send_text(
                             json.dumps({
                                 "type": "session_summary",
@@ -341,7 +303,6 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
                         break
 
                     elif msg_type == "topic":
-                        # Client tells us what was identified
                         session_topics.append(msg.get("data", {}))
 
         except WebSocketDisconnect:
@@ -369,33 +330,6 @@ async def websocket_endpoint(websocket: WebSocket, client_session_id: str):
 def _pack_audio(pcm_data: bytes) -> bytes:
     """Prefix audio bytes with type tag 0x01 so client knows it's audio."""
     return bytes([0x01]) + pcm_data
-
-
-async def _save_session(
-    session_id: str,
-    topics: list,
-    transcript: list,
-    images: list,
-) -> None:
-    """Persist session data to Firestore."""
-    if db is None:
-        return
-    try:
-        import datetime
-        doc_ref = db.collection("sessions").document(session_id)
-        await doc_ref.set(
-            {
-                "session_id": session_id,
-                "topics": topics,
-                "transcript": transcript,
-                "image_count": len(images),
-                "image_captions": [img.get("caption", "") for img in images],
-                "created_at": datetime.datetime.utcnow(),
-            }
-        )
-        logger.info("Session %s saved to Firestore", session_id)
-    except Exception as exc:
-        logger.error("Failed to save session to Firestore: %s", exc)
 
 
 # ---------------------------------------------------------------------------
