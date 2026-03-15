@@ -52,7 +52,7 @@ export function NarrationPanel({ transcript, images, isSpeaking }: Props) {
       `}</style>
       {/* Status pill */}
       <div style={styles.statusRow}>
-        <span style={{ ...styles.pill, background: isSpeaking ? "#c8902a" : "#444" }}>
+        <span style={{ ...styles.pill, background: isSpeaking ? "#1a73e8" : "#3c3c3f" }}>
           {isSpeaking ? "● Narrating" : "◌ Listening"}
         </span>
       </div>
@@ -106,9 +106,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     flexDirection: "column",
     height: "100%",
-    background: "rgba(10,10,10,0.92)",
-    backdropFilter: "blur(12px)",
-    color: "#f0e8d8",
+    background: "#202124",
+    color: "#e8eaed",
     fontFamily: "'Georgia', serif",
   },
   statusRow: {
@@ -118,9 +117,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   pill: {
     fontSize: 11,
-    fontFamily: "monospace",
-    letterSpacing: 1,
-    padding: "3px 10px",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    fontWeight: 500,
+    letterSpacing: 0.4,
+    padding: "3px 12px",
     borderRadius: 20,
     color: "#fff",
     transition: "background 0.3s",
@@ -132,7 +132,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: "8px 16px 16px",
   },
   placeholder: {
-    color: "#666",
+    color: "#5f6368",
     fontStyle: "italic",
     fontSize: 14,
     textAlign: "center",
@@ -140,20 +140,23 @@ const styles: Record<string, React.CSSProperties> = {
   },
   line: {
     fontSize: 15,
-    lineHeight: 1.5,
-    color: "#f0e8d8",
-    marginBottom: 8,
+    lineHeight: 1.65,
+    color: "#e8eaed",
+    marginBottom: 10,
   },
   youLabel: {
-    color: "#888",
+    color: "#9aa0a6",
     fontStyle: "normal",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    fontSize: 13,
   },
   imageCard: {
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: "hidden",
-    background: "#1a1a1a",
-    border: "1px solid #333",
-    marginBottom: 8,
+    background: "#2a2b2e",
+    border: "1px solid #3c3c3f",
+    marginBottom: 12,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
   },
   img: {
     width: "100%",
@@ -162,12 +165,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   caption: {
     fontSize: 11,
-    color: "#888",
-    padding: "6px 10px",
+    color: "#9aa0a6",
+    padding: "7px 12px",
     fontStyle: "italic",
+    fontFamily: "system-ui, -apple-system, sans-serif",
+    lineHeight: 1.4,
   },
   cursor: {
-    color: "#c8902a",
+    color: "#8ab4f8",
     animation: "blink 0.8s step-end infinite",
     marginLeft: 2,
     fontWeight: "bold",

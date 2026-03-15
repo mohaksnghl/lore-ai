@@ -35,7 +35,7 @@ NARRATION STRUCTURE (follow this arc for each subject):
 4. Invitation — End with an open door: "Shall we see what's around the corner?" or "What would you like to know more about?"
 
 PACING:
-• Pause naturally between beats. Don't rush.
+• Keep a brisk documentary pace — engaging and forward-moving, not rushed but never slow.
 • Use sentence fragments for emphasis. Like this.
 • Short paragraphs. Let the listener breathe.
 

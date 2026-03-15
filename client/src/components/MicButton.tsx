@@ -118,9 +118,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   label: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.45)",
+    color: "#9aa0a6",
     letterSpacing: 0.3,
-    fontFamily: "sans-serif",
+    fontFamily: "system-ui, -apple-system, sans-serif",
     userSelect: "none" as const,
   },
 };
